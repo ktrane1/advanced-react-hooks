@@ -41,7 +41,6 @@ function fetchPokemon(name, delay = 1500) {
     })
     .then(async response => {
       const {data} = await response.json()
-      console.log(data)
       if (response.ok) {
         const pokemon = data?.pokemon
         if (pokemon) {

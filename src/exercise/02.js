@@ -31,23 +31,17 @@ function pokemonInfoReducer(state, action) {
   }
 }
 
-function useAsync(asyncCallback, currentState) {
+function useAsync(initialState) {
 
   const [state, dispatch] = React.useReducer(pokemonInfoReducer, {
     status: 'idle',
-    // 🐨 this will need to be "data" instead of "pokemon"
     data: null,
     error: null,
-    ...currentState
+    ...initialState
   })
+  const {status, data, error} = state;
 
-  React.useEffect(() => {
-    // 💰 this first early-exit bit is a little tricky, so let me give you a hint:
-    const promise = asyncCallback()
-    if (!promise) {
-      return
-    }
-    // then you can dispatch and handle the promise etc...
+  const run = React.useCallback(promise => {
     dispatch({type: 'pending'})
     promise.then(
       data => {
@@ -57,31 +51,28 @@ function useAsync(asyncCallback, currentState) {
         dispatch({type: 'rejected', error})
       },
     )
-    // 🐨 you'll accept dependencies as an array and pass that here.
-    // 🐨 because of limitations with ESLint, you'll need to ignore
-    // the react-hooks/exhaustive-deps rule. We'll fix this in an extra credit.
-  }, [asyncCallback])
-  console.log(state)
-  return state
+  }, [])
+
+  return {
+    status,
+    data,
+    error,
+    run
+  }
 }
+
 function PokemonInfo({pokemonName}) {
-  // 🐨 move both the useReducer and useEffect hooks to a custom hook called useAsync
-  // here's how you use it:
-  const asyncCallback = React.useCallback(() => {
+
+  const {data: pokemon, status, error, run} = useAsync({
+    status: pokemonName ? 'pending' : 'idle',
+  })
+
+  React.useEffect(() => {
     if (!pokemonName) {
       return
     }
-    return fetchPokemon(pokemonName)
-  }, [pokemonName])
-
-  const state = useAsync(
-     asyncCallback,
-    {status: pokemonName ? 'pending' : 'idle'},
-  )
-  // 🐨 so your job is to create a useAsync function that makes this work.
-
-  // 🐨 this will change from "pokemon" to "data"
-  const {data: pokemon, status, error} = state
+    run(fetchPokemon(pokemonName))
+  }, [pokemonName, run])
 
   if (status === 'idle' || !pokemonName) {
     return 'Submit a pokemon'
