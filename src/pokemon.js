@@ -11,36 +11,37 @@ function fetchPokemon(name, delay = 1500) {
   const pokemonQuery = `
     query PokemonInfo($name: String) {
       pokemon(name: $name) {
-        id
-        number
-        name
-        image
+        id,
+        number,
+        name,
+        image,
         attacks {
           special {
-            name
-            type
-            damage
+            name,
+            type,
+            damage,
           }
         }
       }
     }
   `
-
+  const _name = name.toLowerCase()
   return window
     .fetch('https://graphql-pokemon2.vercel.app/', {
       // learn more about this API here: https://graphql-pokemon2.vercel.app/
       method: 'POST',
       headers: {
-        'content-type': 'application/json;charset=UTF-8',
-        delay: delay,
+        'content-type': 'application/json',
+        // delay: delay,
       },
       body: JSON.stringify({
         query: pokemonQuery,
-        variables: {name: name.toLowerCase()},
+        variables: {name: _name},
       }),
     })
     .then(async response => {
       const {data} = await response.json()
+      console.log(data)
       if (response.ok) {
         const pokemon = data?.pokemon
         if (pokemon) {
