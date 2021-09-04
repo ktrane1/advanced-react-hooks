@@ -57,7 +57,7 @@ function useAsync(initialState) {
     ...initialState
   })
   const {status, data, error} = state;
-  
+
   const dispatch = useSafeDispatch(unsafeDispatch);
 
   const run = React.useCallback(promise => {
@@ -70,7 +70,7 @@ function useAsync(initialState) {
         dispatch({type: 'rejected', error})
       },
     )
-  }, [])
+  }, [dispatch])
 
   return {
     status,
